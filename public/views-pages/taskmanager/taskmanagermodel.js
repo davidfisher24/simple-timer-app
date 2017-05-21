@@ -36,7 +36,9 @@ var TaskManagerModel = Backbone.Model.extend({
 				operation: "READ",
 			},
 			success: function(data){
-				self.set("tasks",data);
+				var tasks = [];
+				for (var key in data) tasks.push(data[key]); 
+				self.set("tasks",tasks);
 			},
 			error:function(){
 			}

@@ -318,7 +318,9 @@ data: {
 operation: "READ",
 },
 success: function(data){
-self.set("tasks",data);
+var tasks = [];
+for (var key in data) tasks.push(data[key]); 
+self.set("tasks",tasks);
 },
 error:function(){
 }
@@ -433,6 +435,7 @@ $('.classcontrolcontainer').show();
 }, 500),
 
 selectTaskFromList: function(e){
+console.log(this);
 var idTag = $(e.target).hasClass('task-list-item') ? $(e.target).attr('id') : $(e.target).parent().attr('id');
 var id = parseInt(idTag.replace("task-id-",""));
 var task = this.model.get("tasks").filter(function(value,i){

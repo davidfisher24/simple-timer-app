@@ -62,6 +62,7 @@ var TaskManagerView = Backbone.View.extend({
     }, 500),
 
     selectTaskFromList: function(e){
+        console.log(this);
         var idTag = $(e.target).hasClass('task-list-item') ? $(e.target).attr('id') : $(e.target).parent().attr('id');
         var id = parseInt(idTag.replace("task-id-",""));
         var task = this.model.get("tasks").filter(function(value,i){

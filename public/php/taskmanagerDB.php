@@ -14,7 +14,8 @@ class Database{
     private $db_name = "sql11175678";
     private $username = "sql11175678";
     private $password = "r9mkD8izLA";
-    private $table_name = "tasks";
+    private $tasks_table = "tasks";
+    private $times_table = "timetracker";
     private $date;
     private $conn;
 
@@ -36,30 +37,39 @@ class Database{
     }
 
     public function read(){
-        $query = "SELECT id, title, time FROM $this->table_name";
+        $query_tasks = "SELECT id, title, time FROM $this->tasks_table";
+        $query_time = "SELECT * FROM $this->times_table WHERE datestring = '$this->date'";
 
-        $stmt = $this->conn->prepare($query);
+        $stmt = $this->conn->prepare($query_tasks);
         $stmt->execute();
+        $stmt2 = $this->conn->prepare($query_time);
+        $stmt2->execute();
 
         $data_return = array();
+
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-	        $data_return[] = array(
+	        $data_return[$row['id']] = array(
 		    	'id' => $row["id"],
 		    	'title' => $row["title"],
-		    	'time' => $row["time"],
+		    	'time' => 0,
 		    );
+	    }
+	    while ($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)){
+	        $data_return[$row2['taskid']]["time"] =  $row2['time'];
 	    }
 	    $this->conn = null;
         return $data_return;
     }
 
     public function save_time($id,$time){
-    	$find_query = "SELECT time FROM $this->table_name WHERE id = $id LIMIT 1";
+    	$find_query = "SELECT time FROM $this->times_table WHERE taskid = $id AND datestring = '$this->date'";
     	$find = $this->conn->prepare($find_query);
         $find->execute();
         $current_time = $find->fetchcolumn();
 
- 		$query = "UPDATE $this->table_name SET time = $current_time + $time WHERE id = $id";
+        if (!$current_time) $query = "INSERT INTO $this->times_table (taskid, datestring, time) VALUES ($id,'$this->date',$time)";  
+       	else $query = "UPDATE $this->times_table SET time = $current_time + $time WHERE taskid = $id and datestring = '$this->date'";
+ 		
 	    $stmt = $this->conn->prepare($query);
 
 	    if($stmt->execute()){
@@ -73,7 +83,7 @@ class Database{
 
     public function add_task($task){
     	$task = htmlspecialchars(strip_tags($task));
-    	$query = "INSERT INTO $this->table_name (title) VALUES('$task')";
+    	$query = "INSERT INTO $this->tasks_table (title) VALUES('$task')";
         $stmt = $this->conn->prepare($query);
         if($stmt->execute()){
             return $this->conn->lastInsertId();
