@@ -2,9 +2,11 @@
 
 $operation = $_POST["operation"];
 $DB = new Database();
-if ($operation === "READ") echo json_encode($DB->read());
+if ($operation === "READ") echo json_encode($DB->read(null));
+if ($operation === "READ-PREVIOUS") echo json_encode($DB->read($_POST['date']));
 if ($operation === "SAVE-TIME") $DB->save_time($_POST["taskId"],$_POST["timeUpdate"]);
 if ($operation === "ADD-TASK") echo($DB->add_task($_POST["task"]));
+if ($operation === "GET-DATES") echo json_encode($DB->get_days_list());
 exit();
 
 
@@ -36,9 +38,11 @@ class Database{
         return $this->conn;
     }
 
-    public function read(){
+    public function read($date_var){
         $query_tasks = "SELECT id, title, time FROM $this->tasks_table";
-        $query_time = "SELECT * FROM $this->times_table WHERE datestring = '$this->date'";
+        if($date_var) $query_time = "SELECT * FROM $this->times_table WHERE datestring = '$date_var'";
+        else $query_time = "SELECT * FROM $this->times_table WHERE datestring = '$this->date'";
+        
 
         $stmt = $this->conn->prepare($query_tasks);
         $stmt->execute();
@@ -90,6 +94,17 @@ class Database{
         }else{
             return null;
         }
+    }
+
+    public function get_days_list(){
+    	$query = "SELECT DISTINCT datestring FROM $this->times_table ORDER BY datestring DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $dates = array();
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+	        $dates[] = $row['datestring'];
+	    }
+	    return $dates;
     }
 
 

@@ -56,7 +56,7 @@ htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
    "    </div>\n" +
    "\n" +
    "    <div class=\"classcontrolcontainer\">\n" +
-   "	    <p> Welcome to your task manager</p>\n" +
+   "	    <p> Welcome to your task manager.</p>\n" +
    "	    <label for=\"selecttask\">Find a task</label>\n" +
    "	    <input type=\"text\" id=\"selecttask\" />\n" +
    "	    <button id=\"clearselecttasktext\" class=\"btn btn-blue\">Clear</button>\n" +
@@ -74,9 +74,29 @@ htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
    "\n" +
    "</div>";
 
+htmlpartials["summarytablerow"] = "<tr>\n" +
+   "    <td class=\"strow-ranking\"></th>\n" +
+   "    <td class=\"strow-task\"></th> \n" +
+   "    <td class=\"strow-time\"></th>\n" +
+   " </tr>\n" +
+   "";
+
 htmlpartials["tasksummary"] = "<div class=\"tasksumamrypage\">\n" +
    "\n" +
    "	<div class=\"summary-table\">\n" +
+   "\n" +
+   "		<label for=\"selectday\">Select a different day</label>\n" +
+   "		<select id=\"selectday\">\n" +
+   "		</select>\n" +
+   "\n" +
+   "\n" +
+   "		<table class=\"summary-table-body\">\n" +
+   "			<tr>\n" +
+   "			    <th>Ranking</th>\n" +
+   "			    <th>Task</th> \n" +
+   "			    <th>Time</th>\n" +
+   "			 </tr>\n" +
+   "		</table>\n" +
    "	</div>\n" +
    "\n" +
    "</div>";

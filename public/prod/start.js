@@ -100,7 +100,7 @@ htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
 "    </div>\n" +
 "\n" +
 "    <div class=\"classcontrolcontainer\">\n" +
-"	    <p> Welcome to your task manager</p>\n" +
+"	    <p> Welcome to your task manager.</p>\n" +
 "	    <label for=\"selecttask\">Find a task</label>\n" +
 "	    <input type=\"text\" id=\"selecttask\" />\n" +
 "	    <button id=\"clearselecttasktext\" class=\"btn btn-blue\">Clear</button>\n" +
@@ -118,9 +118,29 @@ htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
 "\n" +
 "</div>";
 
+htmlpartials["summarytablerow"] = "<tr>\n" +
+"    <td class=\"strow-ranking\"></th>\n" +
+"    <td class=\"strow-task\"></th> \n" +
+"    <td class=\"strow-time\"></th>\n" +
+" </tr>\n" +
+"";
+
 htmlpartials["tasksummary"] = "<div class=\"tasksumamrypage\">\n" +
 "\n" +
 "	<div class=\"summary-table\">\n" +
+"\n" +
+"		<label for=\"selectday\">Select a different day</label>\n" +
+"		<select id=\"selectday\">\n" +
+"		</select>\n" +
+"\n" +
+"\n" +
+"		<table class=\"summary-table-body\">\n" +
+"			<tr>\n" +
+"			    <th>Ranking</th>\n" +
+"			    <th>Task</th> \n" +
+"			    <th>Time</th>\n" +
+"			 </tr>\n" +
+"		</table>\n" +
 "	</div>\n" +
 "\n" +
 "</div>";
@@ -287,10 +307,28 @@ tasks: [],
 currentTask:null,
 timerrunning: false,
 currenttimer: 0,
+date: null,
+
+dayOptions: [],
 },
 
 initialize:function(){
+this.set("date",new Date().toJSON().slice(0,10));
+this.getDaysOptions();
+},
 
+getRankedTasks: function(tasks){
+
+function compare(a,b) {
+if (parseInt(a.time) < parseInt(b.time))
+return 1;
+if (parseInt(a.time) > parseInt(b.time))
+return -1;
+return 0;
+}
+
+rankedTasks = tasks.sort(compare);
+return rankedTasks;
 },
 
 secondsToTimeObject: function(totalSeconds) {
@@ -307,6 +345,7 @@ return result;
 },
 
 
+
 loadTasksFromDB: function() {
 var self = this;
 var url = SiteConfig.phpUrl + "taskmanagerDB.php";
@@ -321,6 +360,23 @@ success: function(data){
 var tasks = [];
 for (var key in data) tasks.push(data[key]); 
 self.set("tasks",tasks);
+},
+error:function(){
+}
+});
+},
+
+loadTasksFromPreviousDay: function(date) {
+var self = this;
+var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+return $.ajax(url,{
+method: "POST",
+dataType: "json",
+data: {
+operation: "READ-PREVIOUS",
+date: date,
+},
+success: function(data){ 
 },
 error:function(){
 }
@@ -366,6 +422,29 @@ id: id,
 time: 0,
 title: newTask,
 })
+},
+error:function(){
+}
+});
+},
+
+getDaysOptions: function(){
+var self = this;
+var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+
+var data = {
+operation: "GET-DATES",
+};
+
+
+
+return $.ajax(url,{
+method: "POST",
+data: data,
+dataType: "json",
+success: function(data){
+if (data.indexOf(self.get("date")) === -1) data = data.unshift(self.get("date"));
+self.set("dayOptions",data);
 },
 error:function(){
 }
@@ -493,11 +572,57 @@ var TaskSummaryView = Backbone.View.extend({
 
 el : '#pagecontainer',
 
+events: {
+"change #selectday" : "changeDaySelect",
+},
+
 initialize: function() {
 },
 
-render: function() {
+render: function(dayChange) {
 this.$el.html(htmlpartials.tasksummary); 
+this.$table = $('.summary-table-body');
+this.buildTable();
+this.model.get("dayOptions").forEach(function(opt){
+$('#selectday').append('<option value="'+opt+'">'+opt+'</option>')
+});
+},
+
+
+buildTable: function(dayChange){
+var self = this;
+this.$table.empty();
+var tasks = !dayChange ? this.model.getRankedTasks(this.model.get("tasks")) : this.model.getRankedTasks(dayChange);
+var date = !dayChange ? this.model.get("data") : $('#selectday').val();
+
+if (tasks.length === 0) return;
+var totalTimeToday = 0;
+tasks.forEach(function(t,i){
+if (parseInt(t.time) !== 0) {
+var temp = $(htmlpartials.summarytablerow);
+temp.find('td.strow-ranking').append(i + 1);
+temp.find('td.strow-task').append(t.title);
+temp.find('td.strow-time').append(self.model.secondsToTimeObject(t.time));
+self.$table.append(temp);
+totalTimeToday = totalTimeToday + parseInt(t.time);
+}
+});
+
+var finalTemp = $(htmlpartials.summarytablerow);
+finalTemp.find('td.strow-task').append('TOTAL FOR ' + date);
+finalTemp.find('td.strow-time').append(self.model.secondsToTimeObject(totalTimeToday));
+self.$table.append(finalTemp);
+
+},
+
+changeDaySelect:function(){
+var self = this;
+var day = $('#selectday').val();
+$.when(this.model.loadTasksFromPreviousDay(day)).then(function(response){
+var tasks = [];
+for (var key in response) tasks.push(response[key]); 
+self.buildTable(tasks);
+})
 },
 
 processRouteChange : function() {

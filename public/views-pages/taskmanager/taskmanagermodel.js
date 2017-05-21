@@ -5,10 +5,28 @@ var TaskManagerModel = Backbone.Model.extend({
 		currentTask:null,
 		timerrunning: false,
 		currenttimer: 0,
+		date: null,
+		// For the table in summary
+		dayOptions: [],
 	},
 
 	initialize:function(){
+		this.set("date",new Date().toJSON().slice(0,10));
+		this.getDaysOptions();
+	},
 
+	getRankedTasks: function(tasks){
+	
+		function compare(a,b) {
+			if (parseInt(a.time) < parseInt(b.time))
+				return 1;
+			if (parseInt(a.time) > parseInt(b.time))
+				return -1;
+			return 0;
+		}
+
+		rankedTasks = tasks.sort(compare);
+		return rankedTasks;
 	},
 
 	secondsToTimeObject: function(totalSeconds) {
@@ -24,6 +42,7 @@ var TaskManagerModel = Backbone.Model.extend({
 		return result;
 	},
 
+	// DATABASE AJAX CALLS //
 
 	loadTasksFromDB: function() {
 		var self = this;
@@ -39,6 +58,23 @@ var TaskManagerModel = Backbone.Model.extend({
 				var tasks = [];
 				for (var key in data) tasks.push(data[key]); 
 				self.set("tasks",tasks);
+			},
+			error:function(){
+			}
+		});
+	},
+
+	loadTasksFromPreviousDay: function(date) {
+		var self = this;
+		var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+		return $.ajax(url,{
+			method: "POST",
+			dataType: "json",
+			data: {
+				operation: "READ-PREVIOUS",
+				date: date,
+			},
+			success: function(data){ 
 			},
 			error:function(){
 			}
@@ -84,6 +120,29 @@ var TaskManagerModel = Backbone.Model.extend({
 					time: 0,
 					title: newTask,
 				})
+			},
+			error:function(){
+			}
+		});
+	},
+
+	getDaysOptions: function(){
+		var self = this;
+		var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+
+		var data = {
+			operation: "GET-DATES",
+		};
+
+		//dayOptions
+
+		return $.ajax(url,{
+			method: "POST",
+			data: data,
+			dataType: "json",
+			success: function(data){
+				if (data.indexOf(self.get("date")) === -1) data = data.unshift(self.get("date"));
+				self.set("dayOptions",data);
 			},
 			error:function(){
 			}

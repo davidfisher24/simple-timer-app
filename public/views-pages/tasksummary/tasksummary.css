@@ -1,0 +1,33 @@
+.summary-table-body th {
+    text-align: left;
+}
+
+.summary-table-body th, .summary-table-body  td {
+    padding: 15px;
+}
+
+.summary-table-body .summary-table-body th, .summary-table-body td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.summary-table-body  tr:nth-child(even) {
+    background-color: #aaaaaa;
+}
+
+.summary-table-body  tr:first-child{
+    background-color: #dddddd;
+}
+
+.summary-table-body {
+	margin-top: 8px;
+}
+
+select {
+   background: transparent;
+   border: 1px solid #ccc;
+   font-size: 14px;
+   height: 26px;
+   padding: 5px; 
+   width: 120px;
+}
