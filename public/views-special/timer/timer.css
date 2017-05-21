@@ -1,0 +1,32 @@
+.timer {
+    border:1px solid red;
+    padding: 5px;
+    max-width: 400px;
+    width: 100%;
+    float: left;
+    margin: 0 20px 20px 0;
+    text-align:center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.tasktimertitle {
+    font-size: 18px;
+}
+
+.currenttasktitle {
+    font-size: 16px;
+}
+
+#timecounter {
+    margin: 10px;
+}
+
+.timepart, .seperator {
+    font-size:30px;
+}
+
+.timepart {
+    padding: 0 2px;
+}
+
+

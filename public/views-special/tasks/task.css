@@ -1,0 +1,36 @@
+.taskheader {
+	padding-top: 30px;
+}
+
+.tasktitle {
+    color: #aaa;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.emptytasklist {
+	margin-top:5px;
+	display:none;
+}
+
+.task-title {
+	font-family: 'Roboto', sans-serif;
+}
+
+.task-time {
+	font-family: 'Roboto', sans-serif;
+}
+
+table.options {
+	width:70%;
+	margin-left:15%;
+	display:block;
+	float:left;
+}
+
+table.options tr:hover {
+	background-color:rgba(195,195,195,.5);
+	cursor:pointer;
+}
+
+
