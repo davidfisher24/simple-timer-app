@@ -591,9 +591,10 @@ $('#selectday').append('<option value="'+opt+'">'+opt+'</option>')
 
 buildTable: function(dayChange){
 var self = this;
+console.log(this.model);
 this.$table.empty();
 var tasks = !dayChange ? this.model.getRankedTasks(this.model.get("tasks")) : this.model.getRankedTasks(dayChange);
-var date = !dayChange ? this.model.get("data") : $('#selectday').val();
+var date = !dayChange ? this.model.get("date") : $('#selectday').val();
 
 if (tasks.length === 0) return;
 var totalTimeToday = 0;
