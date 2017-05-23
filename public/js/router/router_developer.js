@@ -13,6 +13,7 @@ routerSetupConfig.initialize = function() {
 
     this.taskSummaryView = new TaskSummaryView({model:this.taskManagerModel});
     this.taskManagerView = new TaskManagerView({model:this.taskManagerModel});
+    this.taskAdminView = new TaskAdminView({model:this.taskManagerModel});
 
 
 
@@ -27,6 +28,7 @@ routerSetupConfig.routes =  {
     '(?*path)': function(f, q){ this.routeTunnel('taskmanager', this.taskManagerView, f, q) },
     'taskmanager(/*path)': function(f, q){ this.routeTunnel('taskmanager', this.taskManagerView, f, q) },
     'tasksummary(/*path)': function(f, q){ this.routeTunnel('tasksummary', this.taskSummaryView, f, q) },
+    'taskadmin(/*path)': function(f, q){ this.routeTunnel('taskadmin', this.taskAdminView, f, q) },
     '*badroute': function(){ this.navigate('#', {trigger: true}); }
 };
 

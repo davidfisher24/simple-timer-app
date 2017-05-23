@@ -6,6 +6,7 @@ if ($operation === "READ") echo json_encode($DB->read(null));
 if ($operation === "READ-PREVIOUS") echo json_encode($DB->read($_POST['date']));
 if ($operation === "SAVE-TIME") $DB->save_time($_POST["taskId"],$_POST["timeUpdate"]);
 if ($operation === "ADD-TASK") echo($DB->add_task($_POST["task"]));
+if ($operation === "ERASE-TASK") echo($DB->erase_task($_POST["task"]));
 if ($operation === "GET-DATES") echo json_encode($DB->get_days_list());
 exit();
 
@@ -94,6 +95,18 @@ class Database{
         }else{
             return null;
         }
+    }
+
+    public function erase_task($id){
+        $query1 = "DELETE FROM $this->tasks_table WHERE id = '$id' LIMIT 1";
+        $stmt1 = $this->conn->prepare($query1);
+        $stmt1->execute();
+
+        $query2 = "DELETE FROM $this->times_table WHERE taskid = '$id';";
+        $stmt2 = $this->conn->prepare($query2);
+        $stmt2->execute();
+
+        return;
     }
 
     public function get_days_list(){

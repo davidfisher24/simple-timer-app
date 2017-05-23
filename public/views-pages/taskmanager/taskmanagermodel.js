@@ -8,6 +8,8 @@ var TaskManagerModel = Backbone.Model.extend({
 		date: null,
 		// For the table in summary
 		dayOptions: [],
+		// For the delete task contol
+		selectedDelete: null,
 	},
 
 	initialize:function(){
@@ -126,6 +128,32 @@ var TaskManagerModel = Backbone.Model.extend({
 		});
 	},
 
+	deleteTaskFromDB: function(id){
+		var self = this;
+		var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+
+		var data = {
+			operation: "ERASE-TASK",
+			task: id,
+		};
+
+		return $.ajax(url,{
+			method: "POST",
+			data: data,
+			success: function(){
+				var tasks = self.get("tasks");
+				tasksRearranged = tasks.filter(function(t){
+					console.log(t.id);
+					console.log(id);
+					return t.id != id;
+				});
+				self.set("tasks",tasksRearranged);
+			},
+			error:function(){
+			}
+		});
+	},
+
 	getDaysOptions: function(){
 		var self = this;
 		var url = SiteConfig.phpUrl + "taskmanagerDB.php";
@@ -134,14 +162,13 @@ var TaskManagerModel = Backbone.Model.extend({
 			operation: "GET-DATES",
 		};
 
-		//dayOptions
 
 		return $.ajax(url,{
 			method: "POST",
 			data: data,
 			dataType: "json",
 			success: function(data){
-				if (data.indexOf(self.get("date")) === -1) data = data.unshift(self.get("date"));
+				if (data.indexOf(self.get("date")) === -1) data.unshift(self.get("date"));
 				self.set("dayOptions",data);
 			},
 			error:function(){

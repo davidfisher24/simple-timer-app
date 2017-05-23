@@ -1,5 +1,5 @@
 
-/**** COMPILED 2017-05-21 ****/
+/**** COMPILED 2017-05-23 ****/
 
 /* public/js/lib/jquery-1.11.1.min.js */
 /*! jQuery v1.11.1 | (c) 2005, 2014 jQuery Foundation, Inc. | jquery.org/license */
@@ -42,7 +42,8 @@ var SiteConfig = {
 
 assetsDirectory: assetsDirectory,
 webRoot: DEEPLINK_DIR,
-phpUrl: 'http://localhost/simple-timer-app/public/php/'
+
+phpUrl: 'http://david-fisher.esy.es/public/php/'
 
 };
 /* public/htmlcompiled/partials.js */
@@ -50,11 +51,9 @@ var htmlpartials = {};
 htmlpartials["header"] = "<h2>Simple work timer application</h2>";
 
 htmlpartials["nav"] = "\n" +
-"\n" +
-"\n" +
-"\n" +
 "<a class=\"navitem\" navid=\"taskmanager\"  href=\"#/taskmanager\">Task Manager</a>\n" +
 "<a class=\"navitem\" navid=\"tasksummary\"  href=\"#/tasksummary\">Task Summary</a>\n" +
+"<a class=\"navitem\" navid=\"taskadmin\"  href=\"#/taskadmin\">Delete Old Tasks</a>\n" +
 "";
 
 htmlpartials["structure"] = "<div id=\"appContainer\">\n" +
@@ -91,6 +90,25 @@ htmlpartials["timer"] = "<div class=\"timer\">\n" +
 "	</div>\n" +
 "	<button id=\"timecounterbutton\" class=\"btn btn-green\">Start Work</button>\n" +
 "	<button id=\"timerexitbutton\" class=\"btn btn-blue\">Close Timer</button>\n" +
+"</div>";
+
+htmlpartials["admintablerow"] = "<tr>\n" +
+"    <td class=\"adrow-task\"></td> \n" +
+"    <td class=\"adrow-controls\"></td>\n" +
+" </tr>\n" +
+"";
+
+htmlpartials["taskadmin"] = "<div class=\"taskadminpage\">\n" +
+"\n" +
+"	Here you can remove your old finished tasks or change their name.\n" +
+"\n" +
+"	<div class=\"taskadmintable\">\n" +
+"\n" +
+"\n" +
+"		<table class=\"admin-table-body\">\n" +
+"		</table>\n" +
+"	</div>\n" +
+"\n" +
 "</div>";
 
 htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
@@ -299,6 +317,53 @@ $('.timercontainer').hide();
 },
 
 });
+/* public/views-pages/taskadmin/taskadminview.js */
+
+
+var TaskAdminView = Backbone.View.extend({
+
+el : '#pagecontainer',
+
+events: {
+'click .delete-task' : "deleteTask",
+},
+
+initialize: function() {
+},
+
+render: function() {
+this.$el.html(htmlpartials.taskadmin); 
+this.$table = $('.admin-table-body');
+this.buildTable();
+},
+
+
+buildTable: function(e){
+var self = this;
+this.$table.empty();
+var tasks = this.model.get("tasks");
+
+if (tasks.length === 0) return;
+tasks.forEach(function(t,i){
+var temp = $(htmlpartials.admintablerow);
+temp.find('td.adrow-task').append(t.title);
+temp.find('td.adrow-controls').append('<button class="btn btn-blue delete-task" id="delete-'+t.id+'">Delete</button>');
+self.$table.append(temp);
+});
+},
+
+deleteTask: function(e){
+var self = this;
+$.when(this.model.deleteTaskFromDB(e.target.id.replace('delete-',''))).then(function(){
+self.buildTable();
+});
+},
+
+
+processRouteChange : function() {
+}
+
+});
 /* public/views-pages/taskmanager/taskmanagermodel.js */
 var TaskManagerModel = Backbone.Model.extend({
 
@@ -310,6 +375,8 @@ currenttimer: 0,
 date: null,
 
 dayOptions: [],
+
+selectedDelete: null,
 },
 
 initialize:function(){
@@ -428,6 +495,32 @@ error:function(){
 });
 },
 
+deleteTaskFromDB: function(id){
+var self = this;
+var url = SiteConfig.phpUrl + "taskmanagerDB.php";
+
+var data = {
+operation: "ERASE-TASK",
+task: id,
+};
+
+return $.ajax(url,{
+method: "POST",
+data: data,
+success: function(){
+var tasks = self.get("tasks");
+tasksRearranged = tasks.filter(function(t){
+console.log(t.id);
+console.log(id);
+return t.id != id;
+});
+self.set("tasks",tasksRearranged);
+},
+error:function(){
+}
+});
+},
+
 getDaysOptions: function(){
 var self = this;
 var url = SiteConfig.phpUrl + "taskmanagerDB.php";
@@ -437,13 +530,12 @@ operation: "GET-DATES",
 };
 
 
-
 return $.ajax(url,{
 method: "POST",
 data: data,
 dataType: "json",
 success: function(data){
-if (data.indexOf(self.get("date")) === -1) data = data.unshift(self.get("date"));
+if (data.indexOf(self.get("date")) === -1) data.unshift(self.get("date"));
 self.set("dayOptions",data);
 },
 error:function(){
@@ -591,7 +683,6 @@ $('#selectday').append('<option value="'+opt+'">'+opt+'</option>')
 
 buildTable: function(dayChange){
 var self = this;
-console.log(this.model);
 this.$table.empty();
 var tasks = !dayChange ? this.model.getRankedTasks(this.model.get("tasks")) : this.model.getRankedTasks(dayChange);
 var date = !dayChange ? this.model.get("date") : $('#selectday').val();
@@ -733,6 +824,7 @@ this.taskManagerModel = new TaskManagerModel();
 
 this.taskSummaryView = new TaskSummaryView({model:this.taskManagerModel});
 this.taskManagerView = new TaskManagerView({model:this.taskManagerModel});
+this.taskAdminView = new TaskAdminView({model:this.taskManagerModel});
 
 
 
@@ -747,6 +839,7 @@ routerSetupConfig.routes = {
 '(?*path)': function(f, q){ this.routeTunnel('taskmanager', this.taskManagerView, f, q) },
 'taskmanager(/*path)': function(f, q){ this.routeTunnel('taskmanager', this.taskManagerView, f, q) },
 'tasksummary(/*path)': function(f, q){ this.routeTunnel('tasksummary', this.taskSummaryView, f, q) },
+'taskadmin(/*path)': function(f, q){ this.routeTunnel('taskadmin', this.taskAdminView, f, q) },
 '*badroute': function(){ this.navigate('#', {trigger: true}); }
 };
 

@@ -1,5 +1,5 @@
 
-/**** COMPILED 2017-05-21 ****/
+/**** COMPILED 2017-05-23 ****/
 
 /* public/views-special/structure/structure.css */
 
@@ -193,6 +193,10 @@ padding: 0 2px;
 }
 
 
+/* public/views-pages/taskadmin/taskadmin.css */
+.taskadmintable {
+margin-top: 10px;
+}
 /* public/views-pages/taskmanager/taskmanager.css */
 .imagecontainer {
 max-width: 300px;

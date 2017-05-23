@@ -23,7 +23,6 @@ var TaskSummaryView = Backbone.View.extend({
 
     buildTable: function(dayChange){
     	var self = this;
-    	console.log(this.model);
     	this.$table.empty();
     	var tasks = !dayChange ? this.model.getRankedTasks(this.model.get("tasks")) : this.model.getRankedTasks(dayChange);
     	var date = !dayChange ? this.model.get("date") : $('#selectday').val();

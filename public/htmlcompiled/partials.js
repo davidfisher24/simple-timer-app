@@ -3,14 +3,9 @@ var htmlpartials = {};
 htmlpartials["header"] = "<h2>Simple work timer application</h2>";
 
 htmlpartials["nav"] = "\n" +
-   "<!--\n" +
-   "    make sure each nav item has an attribute navid where the value of navid matches the route for that page\n" +
-   "    updateNavActive()  in navview.js   uses navid to identify the correct item to add a selected state to\n" +
-   "-->\n" +
-   "\n" +
-   "\n" +
    "<a class=\"navitem\" navid=\"taskmanager\"  href=\"#/taskmanager\">Task Manager</a>\n" +
    "<a class=\"navitem\" navid=\"tasksummary\"  href=\"#/tasksummary\">Task Summary</a>\n" +
+   "<a class=\"navitem\" navid=\"taskadmin\"  href=\"#/taskadmin\">Delete Old Tasks</a>\n" +
    "";
 
 htmlpartials["structure"] = "<div id=\"appContainer\">\n" +
@@ -47,6 +42,25 @@ htmlpartials["timer"] = "<div class=\"timer\">\n" +
    "	</div>\n" +
    "	<button id=\"timecounterbutton\" class=\"btn btn-green\">Start Work</button>\n" +
    "	<button id=\"timerexitbutton\" class=\"btn btn-blue\">Close Timer</button>\n" +
+   "</div>";
+
+htmlpartials["admintablerow"] = "<tr>\n" +
+   "    <td class=\"adrow-task\"></td> \n" +
+   "    <td class=\"adrow-controls\"></td>\n" +
+   " </tr>\n" +
+   "";
+
+htmlpartials["taskadmin"] = "<div class=\"taskadminpage\">\n" +
+   "\n" +
+   "	Here you can remove your old finished tasks or change their name.\n" +
+   "\n" +
+   "	<div class=\"taskadmintable\">\n" +
+   "\n" +
+   "\n" +
+   "		<table class=\"admin-table-body\">\n" +
+   "		</table>\n" +
+   "	</div>\n" +
+   "\n" +
    "</div>";
 
 htmlpartials["taskmanager"] = "<div id=\"taskmanagerpage\">\n" +
